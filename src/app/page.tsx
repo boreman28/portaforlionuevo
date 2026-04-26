@@ -192,9 +192,9 @@ export default function Home() {
 
     /* Smooth scroll */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-      anchor.addEventListener('click', function(e) {
+      anchor.addEventListener('click', (e: Event) => {
         e.preventDefault()
-        const href = (this as HTMLAnchorElement).getAttribute('href')
+        const href = (e.currentTarget as HTMLAnchorElement).getAttribute('href')
         if (href) document.querySelector(href)?.scrollIntoView({ behavior: 'smooth' })
       })
     })
@@ -297,16 +297,19 @@ export default function Home() {
             <a href="#contacto" className="btn-primary px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition gap-3">
               Explorar
             </a>
-            <div className="mt-12 grid grid-cols-3 gap-4 text-gray-500 max-w-xs mx-auto md:max-w-none md:flex md:items-center md:justify-center md:gap-8">
-              {[['25+','Años experiencia'],['10K+','Alumnos impactados'],['900+','Docentes capacitados']].map(([v,l],i) => (
-                <>
-                  {i > 0 && <div key={`sep${i}`} className="hidden md:block w-px h-12 bg-gray-800" />}
+            <div className="mt-12 flex flex-col items-center gap-4 text-gray-500 md:flex-row md:justify-center md:gap-8">
+              {[['25+','Años experiencia'],['10K+','Alumnos impactados'],['900+','Docentes capacitados']].flatMap(([v,l], i, arr) => {
+                const items = [
                   <div key={v} className="text-center">
                     <div className="text-2xl md:text-3xl font-bold text-white">{v}</div>
                     <div className="text-xs md:text-sm">{l}</div>
                   </div>
-                </>
-              ))}
+                ]
+                if (i < arr.length - 1) {
+                  items.push(<div key={`sep-${i}`} className="hidden md:block w-px h-12 bg-gray-800" />)
+                }
+                return items
+              })}
             </div>
           </div>
         </div>
