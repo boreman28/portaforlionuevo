@@ -7,6 +7,9 @@ const inter = Inter({ subsets: ['latin'], weight: ['300','400','500','600','700'
 export const metadata: Metadata = {
   title: 'Jorge Polanco Rodríguez — Boreman28',
   description: 'Portafolio profesional — Tecnología y Educación en Acción',
+  icons: {
+    icon: '/icoJp.png',
+  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

@@ -105,7 +105,7 @@ export default function Home() {
 
   useEffect(() => {
 
-    /* Lucide icons */
+    /* 1. Lucide icons con reintentos */
     const initLucide = () => {
       if (typeof (window as any).lucide !== 'undefined') {
         ;(window as any).lucide.createIcons()
@@ -120,7 +120,7 @@ export default function Home() {
     }
     initLucide()
 
-    /* Cursor trail */
+    /* 2. Cursor trail (solo pointer: fine / desktop) */
     const cursor = document.getElementById('cursor-trail')
     const isTouch = window.matchMedia('(pointer: coarse)').matches
     let mX = 0, mY = 0, cX = 0, cY = 0, raf: number
@@ -143,7 +143,7 @@ export default function Home() {
         })
     }
 
-    /* Navbar scroll + Hero parallax */
+    /* 3. Navbar scroll + Hero parallax */
     const navbar = document.getElementById('navbar')
     const heroContent = document.getElementById('hero-content')
     const onScroll = () => {
@@ -157,7 +157,7 @@ export default function Home() {
     }
     window.addEventListener('scroll', onScroll)
 
-    /* Hero title animación char por char */
+    /* 4. Hero title animación char por char */
     const heroTitle = document.getElementById('hero-title')
     if (heroTitle) {
       heroTitle.innerHTML = ''
@@ -172,25 +172,26 @@ export default function Home() {
       })
     }
 
-    /* Scroll animations (IntersectionObserver) */
+    /* 5. IntersectionObserver — scroll animations */
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
     }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' })
     document.querySelectorAll('.animate-on-scroll, .animate-left, .animate-right')
       .forEach(el => obs.observe(el))
 
-    /* Timeline cards animación al entrar en viewport */
+    /* 6. IntersectionObserver — timeline cards */
     const tlObs = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
-          (e.target as HTMLElement).style.opacity = '1';
-          (e.target as HTMLElement).style.transform = 'translateY(0)'
+          const el = e.target as HTMLElement
+          el.style.opacity = '1'
+          el.style.transform = 'translateY(0)'
         }
       })
-    }, { threshold: 0.15 })
+    }, { threshold: 0.1 })
     document.querySelectorAll('.timeline-card-wrap').forEach(el => tlObs.observe(el))
 
-    /* Smooth scroll */
+    /* 7. Smooth scroll */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
       anchor.addEventListener('click', (e: Event) => {
         e.preventDefault()
@@ -199,7 +200,7 @@ export default function Home() {
       })
     })
 
-    /* Tech cards magnet effect */
+    /* 8. Tech cards magnet effect */
     document.querySelectorAll<HTMLElement>('.tech-card').forEach(card => {
       card.addEventListener('mousemove', (e) => {
         const r = card.getBoundingClientRect()
@@ -212,7 +213,7 @@ export default function Home() {
       })
     })
 
-    /* Mobile menu */
+    /* 9. Mobile menu */
     const toggle = document.getElementById('menu-toggle')
     const close  = document.getElementById('menu-close')
     const menu   = document.getElementById('mobile-menu')
@@ -224,7 +225,8 @@ export default function Home() {
 
     return () => {
       window.removeEventListener('scroll', onScroll)
-      obs.disconnect(); tlObs.disconnect()
+      obs.disconnect()
+      tlObs.disconnect()
       if (raf) cancelAnimationFrame(raf)
       document.body.style.cursor = ''
     }
@@ -250,7 +252,7 @@ export default function Home() {
             <span className="ml-3 text-sm font-medium">Boreman28</span>
           </div>
           <div className="hidden md:flex items-center gap-6">
-            {[['#docente','Docente'],['#soporte','Soporte'],['#logros','Logros'],
+            {[['#perfil','Perfil'],['#logros','Logros'],
               ['#stack','Skills'],['#proyectos','Proyectos'],['#contacto','Contacto']
             ].map(([href,label]) => (
               <a key={href} href={href} className="text-xs text-gray-400 hover:text-white transition-colors">{label}</a>
@@ -267,7 +269,7 @@ export default function Home() {
       {/* ── MOBILE MENU ── */}
       <div id="mobile-menu" className="mobile-menu fixed inset-0 z-40 bg-black/95 backdrop-blur-xl md:hidden">
         <div className="flex flex-col items-center justify-center h-full gap-8">
-          {[['#docente','Docente'],['#soporte','Soporte'],['#logros','Logros'],
+          {[['#perfil','Perfil'],['#logros','Logros'],
             ['#stack','Skills'],['#proyectos','Proyectos'],['#contacto','Contacto']
           ].map(([href,label]) => (
             <a key={href} href={href} className="mobile-link text-2xl text-gray-400 hover:text-white">{label}</a>
@@ -315,75 +317,205 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── DOCENTE ── */}
-      <section id="docente" className="py-16 md:py-32 relative bg-white/5">
-        <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <h2 className="text-2xl md:text-4xl font-bold mb-10 flex items-center gap-3">
-            <i data-lucide="graduation-cap" className="text-blue-400 w-8 h-8" />
-            Perfil Docente
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 md:gap-10">
-            <div className="animate-right flex justify-center md:justify-start">
-              <img src="/bore.png" alt="Jorge Polanco Rodríguez"
-                className="glass-card-animated w-full max-w-sm p-4 rounded-2xl object-cover" />
-            </div>
-            <div className="animate-left">
-              <p className="text-sm md:text-base text-gray-400 mb-4">
-                <strong>Jorge Polanco Rodríguez</strong> es un profesional en tecnología educativa
-                con amplia experiencia en el Ministerio de Educación (MEDUCA). Actualmente trabaja
-                en el departamento de informática y forma parte del proyecto{' '}
-                <strong>Entre Pares</strong>, promoviendo la innovación pedagógica con herramientas digitales.
-              </p>
-              <div className="glass-card-animated p-6 md:p-8 rounded-2xl mt-4">
-                <h3 className="text-lg md:text-xl font-semibold mb-4">Actividades</h3>
-                <ul className="space-y-3 text-gray-300 text-sm md:text-base">
-                  {['Talleres tecnológicos','Innovación educativa','Entornos virtuales','Formación docente'].map(a => (
-                    <li key={a} className="flex items-center gap-2"><span className="text-green-400">✔</span> {a}</li>
-                  ))}
-                </ul>
-              </div>
-              <div className="text-sm text-gray-500 p-4 glass rounded-xl mt-4">
-                <h4 className="font-semibold mb-2 text-gray-300">Estudios</h4>
-                <p>Maestría en Entornos Virtuales (en curso)</p>
-                <p>Formación en tecnología educativa</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── PERFIL UNIFICADO (Docente + Soporte) ── */}
+      <section id="perfil" className="py-16 md:py-32 relative bg-white/5 overflow-hidden">
 
-      {/* ── SOPORTE ── */}
-      <section id="soporte" className="py-16 md:py-32 relative">
-        <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <h2 className="text-2xl md:text-4xl font-bold mb-10 flex items-center gap-3">
-            <i data-lucide="wrench" className="text-green-400 w-8 h-8" />
-            Perfil Técnico
-          </h2>
-          <div className="grid md:grid-cols-2 gap-8 md:gap-10">
-            <div className="animate-left">
-              <p className="text-sm md:text-base text-gray-400 mb-6">
-                Soporte, mantenimiento, instalación de sistemas y optimización de equipos.
-              </p>
-              <div className="text-sm text-gray-500 p-4 glass rounded-xl">
-                <h4 className="font-semibold mb-2 text-gray-300">Estudios</h4>
-                <p>Formación técnica en informática</p>
-                <p>Certificaciones en soporte y redes</p>
+        {/* Glow decorativo */}
+        <div
+          className="absolute left-0 top-1/2 pointer-events-none"
+          style={{
+            width: 'min(400px,60vw)', height: 'min(400px,60vw)',
+            transform: 'translateY(-50%)',
+            background: 'radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%)',
+            zIndex: 0,
+          }}
+        />
+
+        <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
+
+          {/* Encabezado */}
+          <div className="text-center mb-10 md:mb-14 animate-on-scroll">
+            <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-4">
+              <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
+              <span className="text-sm text-gray-300">Sobre mí</span>
+            </div>
+            <h2 className="text-2xl md:text-4xl font-bold">
+              Perfil <span className="gradient-text">Profesional</span>
+            </h2>
+          </div>
+
+          {/* Layout principal: foto + contenido */}
+          <div className="flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-14">
+
+            {/* ── FOTO DE PERFIL con anillo giratorio ── */}
+            <div className="flex-shrink-0 animate-on-scroll flex flex-col items-center gap-6">
+
+              {/* Foto principal con anillo */}
+              <div className="relative" style={{ width: 200, height: 200 }}>
+                <div className="profile-glow" />
+                <div className="profile-ring" style={{ width: 200, height: 200 }}>
+                  <img
+                    src="/bore.png"
+                    alt="Jorge Polanco Rodríguez"
+                    width={200}
+                    height={200}
+                    style={{ width: 200, height: 200, objectFit: 'cover' }}
+                  />
+                </div>
+              </div>
+
+              {/* Badge disponible */}
+              <div className="glass px-4 py-2 rounded-full flex items-center gap-2">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-xs text-gray-300">Disponible para proyectos</span>
+              </div>
+
+              {/* Mini stats verticales */}
+              <div className="glass-card rounded-2xl p-4 w-full text-center space-y-3">
+                {[
+                  { v:'25+',  l:'Años experiencia', c:'#818cf8' },
+                  { v:'10K+', l:'Alumnos',          c:'#a78bfa' },
+                  { v:'900+', l:'Docentes',          c:'#4ade80' },
+                ].map(s => (
+                  <div key={s.v}>
+                    <div className="font-bold text-xl" style={{ color: s.c }}>{s.v}</div>
+                    <div className="text-xs text-gray-500">{s.l}</div>
+                  </div>
+                ))}
               </div>
             </div>
-            <div className="glass-card-animated animate-right p-6 md:p-8 rounded-2xl">
-              <h3 className="text-lg md:text-xl font-semibold mb-4">Actividades</h3>
-              <ul className="space-y-3 text-gray-300 text-sm md:text-base">
-                {['Reparación de equipos','Windows / Linux','Redes básicas','Optimización'].map(a => (
-                  <li key={a} className="flex items-center gap-2"><span className="text-green-400">✔</span> {a}</li>
-                ))}
-              </ul>
+
+            {/* ── CONTENIDO CON TABS ── */}
+            <div className="flex-1 w-full">
+
+              {/* Presentación */}
+              <div className="animate-right mb-6">
+                <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
+                  Jorge Polanco Rodríguez
+                </h3>
+                <p className="text-sm md:text-base text-gray-400 leading-relaxed mb-2">
+                  Profesional en tecnología educativa con más de 25 años de experiencia en el
+                  Ministerio de Educación (MEDUCA). Actualmente trabaja en el departamento de
+                  informática y lidera el proyecto <strong className="text-white">Entre Pares</strong>,
+                  promoviendo la innovación pedagógica y el uso de herramientas digitales en el aula.
+                </p>
+                <p className="text-sm md:text-base text-gray-400 leading-relaxed">
+                  Ha liderado proyectos tecnológicos que han optimizado procesos y mejorado la
+                  productividad organizacional. Su planificación estratégica y liderazgo han
+                  garantizado el cumplimiento de objetivos ambiciosos, fomentando entornos de
+                  colaboración y aprendizaje continuo.
+                </p>
+              </div>
+
+              {/* Tabs Docente / Técnico */}
+              <div className="animate-left">
+
+                {/* Botones de tab */}
+                <div className="flex gap-4 mb-6 border-b border-white/10">
+                  <button
+                    id="tab-docente"
+                    className="profile-tab active pb-3 text-sm md:text-base font-semibold text-gray-400 flex items-center gap-2"
+                    onClick={() => {
+                      document.getElementById('tab-docente')?.classList.add('active')
+                      document.getElementById('tab-soporte')?.classList.remove('active')
+                      document.getElementById('content-docente')?.classList.add('active')
+                      document.getElementById('content-soporte')?.classList.remove('active')
+                    }}
+                  >
+                    <i data-lucide="graduation-cap" className="w-4 h-4 text-blue-400" />
+                    Docente
+                  </button>
+                  <button
+                    id="tab-soporte"
+                    className="profile-tab pb-3 text-sm md:text-base font-semibold text-gray-400 flex items-center gap-2"
+                    onClick={() => {
+                      document.getElementById('tab-soporte')?.classList.add('active')
+                      document.getElementById('tab-docente')?.classList.remove('active')
+                      document.getElementById('content-soporte')?.classList.add('active')
+                      document.getElementById('content-docente')?.classList.remove('active')
+                    }}
+                  >
+                    <i data-lucide="wrench" className="w-4 h-4 text-green-400" />
+                    Técnico
+                  </button>
+                </div>
+
+                {/* Contenido tab Docente */}
+                <div id="content-docente" className="profile-tab-content active">
+                  <div className="grid sm:grid-cols-2 gap-4">
+
+                    <div className="glass-card-animated p-5 rounded-2xl">
+                      <h4 className="text-sm font-semibold text-blue-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="list-checks" className="w-4 h-4" />
+                        Actividades
+                      </h4>
+                      <ul className="space-y-2 text-gray-300 text-sm">
+                        {['Talleres tecnológicos','Innovación educativa','Entornos virtuales','Formación docente','Proyecto Entre Pares'].map(a => (
+                          <li key={a} className="flex items-center gap-2">
+                            <span className="text-green-400 text-xs">✔</span> {a}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="glass-card-animated p-5 rounded-2xl">
+                      <h4 className="text-sm font-semibold text-purple-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="book-open" className="w-4 h-4" />
+                        Estudios
+                      </h4>
+                      <ul className="space-y-2 text-gray-400 text-sm">
+                        <li>Maestría en Entornos Virtuales <span className="text-xs text-gray-600">(en curso)</span></li>
+                        <li>Tecnología Educativa</li>
+                        <li>Docentes Digitales — MEDUCA</li>
+                        <li>Gamificación para Docentes</li>
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* Contenido tab Técnico */}
+                <div id="content-soporte" className="profile-tab-content">
+                  <div className="grid sm:grid-cols-2 gap-4">
+
+                    <div className="glass-card-animated p-5 rounded-2xl">
+                      <h4 className="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="list-checks" className="w-4 h-4" />
+                        Actividades
+                      </h4>
+                      <ul className="space-y-2 text-gray-300 text-sm">
+                        {['Soporte técnico MEDUCA','Reparación de equipos','Windows / Linux','Redes básicas','Optimización de sistemas'].map(a => (
+                          <li key={a} className="flex items-center gap-2">
+                            <span className="text-green-400 text-xs">✔</span> {a}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="glass-card-animated p-5 rounded-2xl">
+                      <h4 className="text-sm font-semibold text-cyan-400 mb-3 flex items-center gap-2">
+                        <i data-lucide="award" className="w-4 h-4" />
+                        Certificaciones
+                      </h4>
+                      <ul className="space-y-2 text-gray-400 text-sm">
+                        <li>Formación técnica en informática</li>
+                        <li>Certificaciones en soporte</li>
+                        <li>Redes y conectividad</li>
+                        <li>Microsoft Office 365</li>
+                      </ul>
+                    </div>
+
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
       </section>
 
       {/* ── TIMELINE DE LOGROS ── */}
-      <section id="logros" className="py-16 md:py-32 relative overflow-hidden bg-white/5">
+      <section id="logros" className="py-16 md:py-32 relative overflow-hidden">
         <div
           className="absolute right-0 top-1/2 pointer-events-none"
           style={{ width:'min(400px,60vw)', height:'min(400px,60vw)', transform:'translateY(-50%)',
@@ -409,7 +541,6 @@ export default function Home() {
 
           {/* Timeline */}
           <div className="relative">
-
             {/* Línea central — solo desktop */}
             <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-px timeline-line" />
 
@@ -447,28 +578,19 @@ export default function Home() {
                             el.style.background = 'rgba(255,255,255,0.03)'
                           }}
                         >
-                          {/* Badge tipo */}
                           <span className="inline-block text-xs font-medium px-2 py-1 rounded-full mb-2 bg-white/5"
                             style={{ color: item.color }}>
                             {item.type}
                           </span>
-
-                          {/* Período */}
                           <div className="text-xs md:text-sm font-semibold mb-1" style={{ color: item.color }}>
                             {item.period}
                           </div>
-
-                          {/* Rol */}
                           <h3 className="text-sm md:text-base lg:text-lg font-bold text-white mb-2 md:mb-3">
                             {item.role}
                           </h3>
-
-                          {/* Descripción */}
                           <p className="text-xs md:text-sm text-gray-400 leading-relaxed mb-3 md:mb-4">
                             {item.description}
                           </p>
-
-                          {/* Tags */}
                           <div className={`flex flex-wrap gap-1 md:gap-2 ${isLeft ? 'md:justify-end' : 'md:justify-start'}`}>
                             {item.tags.map(tag => (
                               <span key={tag}
@@ -484,10 +606,7 @@ export default function Home() {
                       <div className="hidden md:flex w-2/12 justify-center items-start pt-5 relative z-10">
                         <div
                           className="timeline-dot w-4 h-4 rounded-full border-2 bg-[#0a0a0a]"
-                          style={{
-                            borderColor: item.dot,
-                            boxShadow: `0 0 12px ${item.glow}`,
-                          }}
+                          style={{ borderColor: item.dot, boxShadow: `0 0 12px ${item.glow}` }}
                         />
                       </div>
 
@@ -518,7 +637,7 @@ export default function Home() {
       </section>
 
       {/* ── STACK ── */}
-      <section id="stack" className="py-16 md:py-32 text-center">
+      <section id="stack" className="py-16 md:py-32 text-center bg-white/5">
         <h2 className="text-2xl md:text-4xl font-bold mb-10">Tecnologías</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 max-w-4xl mx-auto px-4">
           {[
@@ -538,7 +657,7 @@ export default function Home() {
       </section>
 
       {/* ── PROYECTOS ── */}
-      <section id="proyectos" className="py-16 md:py-32 px-4 md:px-6 relative bg-white/5">
+      <section id="proyectos" className="py-16 md:py-32 px-4 md:px-6 relative">
         <h2 className="text-2xl md:text-4xl text-center mb-12">Proyectos</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
           {[
@@ -556,7 +675,7 @@ export default function Home() {
       </section>
 
       {/* ── CONTACTO ── */}
-      <section id="contacto" className="py-16 md:py-32 text-center relative">
+      <section id="contacto" className="py-16 md:py-32 text-center relative bg-white/5">
         <div className="max-w-3xl mx-auto px-4 md:px-6">
           <h2 className="text-2xl md:text-4xl font-bold mb-6">Contacto</h2>
           <p className="text-sm md:text-base text-gray-400 mb-10">¿Tienes un proyecto en mente? Hablemos.</p>
