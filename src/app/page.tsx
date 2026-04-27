@@ -126,6 +126,7 @@ export default function Home() {
     const spotlight = document.getElementById('mouse-spotlight')
     let sX = window.innerWidth / 2, sY = window.innerHeight / 2
     let tX = sX, tY = sY, sRaf: number
+    let spotCleanup: (() => void) | null = null
     if (!isTouch && spotlight) {
       const onSpot = (e: MouseEvent) => {
         tX = e.clientX; tY = e.clientY
@@ -139,7 +140,7 @@ export default function Home() {
         sRaf = requestAnimationFrame(spotTick)
       }
       spotTick()
-      return () => {
+      spotCleanup = () => {
         document.removeEventListener('mousemove', onSpot)
         if (sRaf) cancelAnimationFrame(sRaf)
       }
@@ -237,6 +238,7 @@ export default function Home() {
       window.removeEventListener('scroll', onScroll)
       obs.disconnect()
       tlObs.disconnect()
+      spotCleanup?.()
     }
   }, [])
 
