@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 const timelineItems = [
   {
     id: '1',
-    period: '2024 — Presente',
+    period: '2025 — Presente',
     role: 'Soporte Técnico — MEDUCA',
     type: 'Trabajo',
     color: '#22d3ee',
@@ -300,7 +300,7 @@ export default function Home() {
               Explorar
             </a>
             <div className="mt-12 flex flex-col items-center gap-4 text-gray-500 md:flex-row md:justify-center md:gap-8">
-              {[['25+','Años experiencia'],['10K+','Alumnos impactados'],['900+','Docentes capacitados']].flatMap(([v,l], i, arr) => {
+              {[['20+','Años experiencia'],['10K+','Alumnos impactados'],['900+','Docentes capacitados']].flatMap(([v,l], i, arr) => {
                 const items = [
                   <div key={v} className="text-center">
                     <div className="text-2xl md:text-3xl font-bold text-white">{v}</div>
@@ -373,7 +373,7 @@ export default function Home() {
               {/* Mini stats verticales */}
               <div className="glass-card rounded-2xl p-4 w-full text-center space-y-3">
                 {[
-                  { v:'25+',  l:'Años experiencia', c:'#818cf8' },
+                  { v:'20+',  l:'Años experiencia', c:'#818cf8' },
                   { v:'10K+', l:'Alumnos',          c:'#a78bfa' },
                   { v:'900+', l:'Docentes',          c:'#4ade80' },
                 ].map(s => (
@@ -394,7 +394,7 @@ export default function Home() {
                   Jorge Polanco Rodríguez
                 </h3>
                 <p className="text-sm md:text-base text-gray-400 leading-relaxed mb-2">
-                  Profesional en tecnología educativa con más de 25 años de experiencia en el
+                  Profesional en tecnología educativa con más de 20 años de experiencia en el
                   Ministerio de Educación (MEDUCA). Actualmente trabaja en el departamento de
                   informática y lidera el proyecto <strong className="text-white">Entre Pares</strong>,
                   promoviendo la innovación pedagógica y el uso de herramientas digitales en el aula.
@@ -534,7 +534,7 @@ export default function Home() {
               <span className="gradient-text">Experiencia</span>
             </h2>
             <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto">
-              Más de 25 años integrando tecnología y educación, liderando proyectos que han
+              Más de 20 años integrando tecnología y educación, liderando proyectos que han
               impactado miles de docentes y estudiantes en Panamá y el mundo.
             </p>
           </div>
@@ -622,7 +622,7 @@ export default function Home() {
           {/* Resumen de impacto */}
           <div className="mt-12 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 animate-on-scroll">
             {[
-              { v:'25+',  l:'Años de experiencia',     c:'#818cf8' },
+              { v:'20+',  l:'Años de experiencia',     c:'#818cf8' },
               { v:'10K+', l:'Alumnos impactados',      c:'#a78bfa' },
               { v:'900+', l:'Docentes capacitados',    c:'#4ade80' },
               { v:'9',    l:'Escuelas transformadas',  c:'#22d3ee' },
