@@ -120,42 +120,30 @@ export default function Home() {
     }
     initLucide()
 
-    /* 2. Cursor trail (solo pointer: fine / desktop) */
-    const cursor = document.getElementById('cursor-trail')
+    /* 2. Spotlight de fondo que sigue el mouse (sin cursor ring) */
     const isTouch = window.matchMedia('(pointer: coarse)').matches
-    let mX = 0, mY = 0, cX = 0, cY = 0, raf: number
-
-    if (!isTouch && cursor) {
-      cursor.style.display = 'block'
-      document.body.style.cursor = 'none'
-      const onMove = (e: MouseEvent) => { mX = e.clientX; mY = e.clientY }
-      document.addEventListener('mousemove', onMove)
-      const tick = () => {
-        cX += (mX - cX) * 0.15; cY += (mY - cY) * 0.15
-        cursor.style.left = cX + 'px'; cursor.style.top = cY + 'px'
-        raf = requestAnimationFrame(tick)
-      }
-      tick()
-      document.querySelectorAll('a, button, .glass-card-animated, .tech-card, .skill-card, .timeline-card')
-        .forEach(el => {
-          el.addEventListener('mouseenter', () => cursor.classList.add('active'))
-          el.addEventListener('mouseleave', () => cursor.classList.remove('active'))
-        })
-    }
-
-    /* 2b. Mouse-following background spotlight */
+    let raf: number
     const spotlight = document.getElementById('mouse-spotlight')
     let sX = window.innerWidth / 2, sY = window.innerHeight / 2
     let tX = sX, tY = sY, sRaf: number
-    const onSpot = (e: MouseEvent) => { tX = e.clientX; tY = e.clientY }
-    document.addEventListener('mousemove', onSpot)
-    const spotTick = () => {
-      sX += (tX - sX) * 0.08; sY += (tY - sY) * 0.08
-      if (spotlight) spotlight.style.background =
-        `radial-gradient(600px circle at ${sX}px ${sY}px, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.06) 40%, transparent 70%)`
-      sRaf = requestAnimationFrame(spotTick)
+    if (!isTouch && spotlight) {
+      const onSpot = (e: MouseEvent) => {
+        tX = e.clientX; tY = e.clientY
+        spotlight.style.opacity = '1'
+      }
+      document.addEventListener('mousemove', onSpot)
+      const spotTick = () => {
+        sX += (tX - sX) * 0.06; sY += (tY - sY) * 0.06
+        spotlight.style.background =
+          `radial-gradient(700px circle at ${sX}px ${sY}px, rgba(99,102,241,0.09) 0%, rgba(168,85,247,0.04) 45%, transparent 70%)`
+        sRaf = requestAnimationFrame(spotTick)
+      }
+      spotTick()
+      return () => {
+        document.removeEventListener('mousemove', onSpot)
+        if (sRaf) cancelAnimationFrame(sRaf)
+      }
     }
-    spotTick()
 
     /* 3. Navbar scroll + Hero parallax */
     const navbar = document.getElementById('navbar')
@@ -247,12 +235,8 @@ export default function Home() {
 
     return () => {
       window.removeEventListener('scroll', onScroll)
-      document.removeEventListener('mousemove', onSpot)
       obs.disconnect()
       tlObs.disconnect()
-      if (raf) cancelAnimationFrame(raf)
-      if (sRaf) cancelAnimationFrame(sRaf)
-      document.body.style.cursor = ''
     }
   }, [])
 
@@ -261,7 +245,7 @@ export default function Home() {
       style={{ background: 'linear-gradient(180deg,#0a0a0a 0%,#111118 50%,#0a0a0a 100%)' }}>
 
       <div id="cursor-trail" className="cursor-trail" />
-      <div id="mouse-spotlight" className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />
+      <div id="mouse-spotlight" className="fixed inset-0 pointer-events-none" style={{ zIndex: 0, opacity: 0, transition: 'opacity 0.6s ease' }} />
       <div className="glow" style={{ position: 'fixed', left: '33%', top: 0, transform: 'translateX(-50%)', zIndex: -1 }} />
       <div className="glow" style={{ position: 'fixed', right: 0, bottom: '33%', transform: 'translateX(50%)', zIndex: -1 }} />
 
@@ -575,8 +559,8 @@ export default function Home() {
                     className="timeline-card-wrap"
                     style={{
                       opacity: 0,
-                      transform: 'translateY(30px)',
-                      transition: `all 0.7s cubic-bezier(0.4,0,0.2,1) ${index * 0.1}s`,
+                      transform: isLeft ? 'translateX(40px)' : 'translateX(-40px)',
+                      transition: `opacity 0.6s ease ${index * 0.08}s, transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94) ${index * 0.08}s`,
                     }}>
                     <div className={`relative flex flex-col md:flex-row ${isLeft ? '' : 'md:flex-row-reverse'} items-start md:mb-10`}>
 
