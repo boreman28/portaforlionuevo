@@ -175,9 +175,17 @@ export default function Home() {
     /* 5. IntersectionObserver — scroll animations */
     const obs = new IntersectionObserver((entries) => {
       entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible') })
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' })
+    }, { threshold: 0.05, rootMargin: '0px 0px 0px 0px' })
     document.querySelectorAll('.animate-on-scroll, .animate-left, .animate-right')
-      .forEach(el => obs.observe(el))
+      .forEach(el => {
+        // If already in viewport on load, make visible immediately
+        const rect = el.getBoundingClientRect()
+        if (rect.top < window.innerHeight && rect.bottom > 0) {
+          el.classList.add('visible')
+        } else {
+          obs.observe(el)
+        }
+      })
 
     /* 6. IntersectionObserver — timeline cards */
     const tlObs = new IntersectionObserver((entries) => {
@@ -394,9 +402,10 @@ export default function Home() {
                   Jorge Polanco Rodríguez
                 </h3>
                 <p className="text-sm md:text-base text-gray-400 leading-relaxed mb-2">
-                  Profesional en tecnología educativa con más de 20 años de experiencia en el
-                  Ministerio de Educación (MEDUCA). Actualmente trabaja en el departamento de
-                  informática y lidera el proyecto <strong className="text-white">Entre Pares</strong>,
+                  Profesional con más de 20 años de trayectoria en tecnología educativa.
+                  Actualmente se desempeña en el Ministerio de Educación (MEDUCA) desde 2025,
+                  trabajando en el departamento de informática y liderando el proyecto{' '}
+                  <strong className="text-white">Entre Pares</strong>,
                   promoviendo la innovación pedagógica y el uso de herramientas digitales en el aula.
                 </p>
                 <p className="text-sm md:text-base text-gray-400 leading-relaxed">
