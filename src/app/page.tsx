@@ -143,6 +143,20 @@ export default function Home() {
         })
     }
 
+    /* 2b. Mouse-following background spotlight */
+    const spotlight = document.getElementById('mouse-spotlight')
+    let sX = window.innerWidth / 2, sY = window.innerHeight / 2
+    let tX = sX, tY = sY, sRaf: number
+    const onSpot = (e: MouseEvent) => { tX = e.clientX; tY = e.clientY }
+    document.addEventListener('mousemove', onSpot)
+    const spotTick = () => {
+      sX += (tX - sX) * 0.08; sY += (tY - sY) * 0.08
+      if (spotlight) spotlight.style.background =
+        `radial-gradient(600px circle at ${sX}px ${sY}px, rgba(99,102,241,0.12) 0%, rgba(168,85,247,0.06) 40%, transparent 70%)`
+      sRaf = requestAnimationFrame(spotTick)
+    }
+    spotTick()
+
     /* 3. Navbar scroll + Hero parallax */
     const navbar = document.getElementById('navbar')
     const heroContent = document.getElementById('hero-content')
@@ -233,9 +247,11 @@ export default function Home() {
 
     return () => {
       window.removeEventListener('scroll', onScroll)
+      document.removeEventListener('mousemove', onSpot)
       obs.disconnect()
       tlObs.disconnect()
       if (raf) cancelAnimationFrame(raf)
+      if (sRaf) cancelAnimationFrame(sRaf)
       document.body.style.cursor = ''
     }
   }, [])
@@ -245,6 +261,7 @@ export default function Home() {
       style={{ background: 'linear-gradient(180deg,#0a0a0a 0%,#111118 50%,#0a0a0a 100%)' }}>
 
       <div id="cursor-trail" className="cursor-trail" />
+      <div id="mouse-spotlight" className="fixed inset-0 pointer-events-none" style={{ zIndex: 0 }} />
       <div className="glow" style={{ position: 'fixed', left: '33%', top: 0, transform: 'translateX(-50%)', zIndex: -1 }} />
       <div className="glow" style={{ position: 'fixed', right: 0, bottom: '33%', transform: 'translateX(50%)', zIndex: -1 }} />
 
@@ -407,7 +424,7 @@ export default function Home() {
                   promoviendo la innovación pedagógica y el uso de herramientas digitales en el aula.
                 </p>
                 <p className="text-sm md:text-base text-gray-400 leading-relaxed">
-                  A lo largo de su trayectoria, ha liderado proyectos tecnológicos orientados a optimizar procesos y fortalecer la productividad institucional. Se destaca por su capacidad de planificación estratégica y liderazgo, logrando el cumplimiento de objetivos retadores y promoviendo entornos de trabajo colaborativos enfocados en el aprendizaje continuo.
+                  A lo largo de su trayectoria, ha liderado proyectos tecnológicos enfocados en optimizar procesos y fortalecer la productividad en el ámbito de la tecnología educativa. Se destaca por su capacidad de planificación estratégica y liderazgo, logrando el cumplimiento de objetivos desafiantes y promoviendo entornos de trabajo colaborativos orientados al aprendizaje continuo.
                 </p>
               </div>
 
