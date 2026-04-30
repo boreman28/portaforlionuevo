@@ -1,5 +1,6 @@
 'use client'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import Image from 'next/image'
 
 /* ── DATOS DEL TIMELINE ── */
 const timelineItems = [
@@ -101,7 +102,107 @@ const timelineItems = [
   },
 ]
 
+/* ── TECH STACK COMPLETO ── */
+const techStack = [
+  {
+    title: 'Lenguajes',
+    icon: 'code-2',
+    color: 'text-blue-400',
+    items: ['JavaScript', 'TypeScript', 'Java', 'PHP']
+  },
+  {
+    title: 'Frontend',
+    icon: 'layout',
+    color: 'text-pink-400',
+    items: ['HTML5', 'CSS3', 'SASS', 'Tailwind CSS', 'Bootstrap', 'React', 'Angular']
+  },
+  {
+    title: 'Backend',
+    icon: 'server',
+    color: 'text-green-400',
+    items: ['Node.js', 'Laravel', 'Spring']
+  },
+  {
+    title: 'Bases de datos',
+    icon: 'database',
+    color: 'text-yellow-400',
+    items: ['MySQL', 'MariaDB', 'SQLite']
+  },
+  {
+    title: 'Infraestructura & Seguridad',
+    icon: 'shield-check',
+    color: 'text-purple-400',
+    items: ['Docker', 'Apache', 'JWT']
+  },
+  {
+    title: 'Herramientas',
+    icon: 'wrench',
+    color: 'text-orange-400',
+    items: ['NPM', 'jQuery']
+  },
+  {
+    label: 'Autoría E-Learning',
+    icon: 'book-open',
+    color: '#f472b6',
+    techs: [
+      { name: 'iSpring Suite', icon: 'play-circle', color: '#f472b6' },
+      { name: 'Articulate 360', icon: 'layers', color: '#fb923c' },
+      { name: 'Iseazy', icon: 'sparkles', color: '#34d399' },
+      { name: 'Genially', icon: 'star', color: '#fbbf24' },
+      { name: 'Adobe Captivate', icon: 'video', color: '#f87171' },
+      { name: 'EXeLearning', icon: 'book', color: '#60a5fa' },
+    ],
+  }
+]
+
 export default function Home() {
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [showResults, setShowResults] = useState(false)
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query)
+    if (query.trim().length < 2) {
+      setSearchResults([])
+      setShowResults(false)
+      return
+    }
+
+    const results: any[] = []
+    const lowerQuery = query.toLowerCase()
+
+    timelineItems.forEach(item => {
+      if (item.role.toLowerCase().includes(lowerQuery) ||
+          item.description.toLowerCase().includes(lowerQuery) ||
+          item.tags.some((tag: string) => tag.toLowerCase().includes(lowerQuery))) {
+        results.push({ type: 'logro', ...item })
+      }
+    })
+
+    techStack.forEach(cat => {
+      const title = cat.title || cat.label || ''
+      if (title.toLowerCase().includes(lowerQuery)) {
+        results.push({ type: 'skill', title, category: cat })
+      }
+      if (cat.items) {
+        cat.items.forEach((item: string) => {
+          if (item.toLowerCase().includes(lowerQuery)) {
+            results.push({ type: 'skill-item', title: item, category: cat.title || cat.label })
+          }
+        })
+      }
+      if (cat.techs) {
+        cat.techs.forEach((tech: any) => {
+          if (tech.name.toLowerCase().includes(lowerQuery)) {
+            results.push({ type: 'skill-item', title: tech.name, category: cat.label })
+          }
+        })
+      }
+    })
+
+    setSearchResults(results)
+    setShowResults(true)
+  }
 
   useEffect(() => {
 
@@ -190,17 +291,30 @@ export default function Home() {
         }
       })
 
-    /* 6. IntersectionObserver — timeline cards */
+    /* 6. Timeline: entrada desde afuera hacia el centro */
     const tlObs = new IntersectionObserver((entries) => {
       entries.forEach(e => {
         if (e.isIntersecting) {
-          const el = e.target as HTMLElement
-          el.style.opacity = '1'
-          el.style.transform = 'translateY(0)'
+          e.target.classList.add('tl-visible')
+          tlObs.unobserve(e.target)
+        }
+      })
+    }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' })
+
+    document.querySelectorAll('.tl-item').forEach(el => tlObs.observe(el))
+
+    /* 7. Timeline: línea crece al entrar en vista */
+    const lineObs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          document.getElementById('tl-line')?.classList.add('tl-visible')
+          lineObs.disconnect()
         }
       })
     }, { threshold: 0.1 })
-    document.querySelectorAll('.timeline-card-wrap').forEach(el => tlObs.observe(el))
+
+    const tlSection = document.getElementById('logros')
+    if (tlSection) lineObs.observe(tlSection)
 
     /* 7. Smooth scroll */
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -252,7 +366,7 @@ export default function Home() {
       <div className="glow" style={{ position: 'fixed', right: 0, bottom: '33%', transform: 'translateX(50%)', zIndex: -1 }} />
 
       {/* ── NAVBAR ── */}
-      <nav id="navbar" className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3">
+<nav id="navbar" className="fixed top-0 left-0 right-0 z-50 transition-all duration-300 py-3">
         <div className="max-w-6xl mx-auto px-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="flex gap-2">
@@ -262,9 +376,42 @@ export default function Home() {
             </div>
             <span className="ml-3 text-sm font-medium">Boreman28</span>
           </div>
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Buscar..."
+                value={searchQuery}
+                onChange={(e) => handleSearch(e.target.value)}
+                onFocus={() => searchResults.length > 0 && setShowResults(true)}
+                onBlur={() => setTimeout(() => setShowResults(false), 200)}
+                className="bg-white/5 border border-white/10 rounded-full px-4 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-indigo-500 w-32 focus:w-48 transition-all"
+              />
+              <svg className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              {showResults && searchResults.length > 0 && (
+                <div className="absolute top-full mt-2 right-0 w-72 bg-black/90 backdrop-blur-xl border border-white/10 rounded-xl p-2 max-h-80 overflow-y-auto">
+                  {searchResults.map((result, i) => (
+                    <button
+                      key={i}
+                      onClick={() => {
+                        if (result.type === 'logro') document.getElementById('logros')?.scrollIntoView({ behavior: 'smooth' })
+                        else document.getElementById('stack')?.scrollIntoView({ behavior: 'smooth' })
+                        setShowResults(false)
+                        setSearchQuery('')
+                      }}
+                      className="w-full text-left px-3 py-2 rounded-lg hover:bg-white/10 transition-colors"
+                    >
+                      <div className="text-sm text-white">{result.type === 'logro' ? result.role : result.title}</div>
+                      <div className="text-xs text-gray-500">{result.type === 'logro' ? result.period : result.category}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             {[['#perfil', 'Perfil'], ['#logros', 'Logros'],
-            ['#stack', 'Skills'], ['#proyectos', 'Proyectos'], ['#contacto', 'Contacto']
+            ['#stack', 'Skills'], ['#proyectos', 'Proyectos'], ['/contact', 'Contacto']
             ].map(([href, label]) => (
               <a key={href} href={href} className="text-xs text-gray-400 hover:text-white transition-colors">{label}</a>
             ))}
@@ -285,6 +432,10 @@ export default function Home() {
           ].map(([href, label]) => (
             <a key={href} href={href} className="mobile-link text-2xl text-gray-400 hover:text-white">{label}</a>
           ))}
+          <a href="#perfil" className="mobile-link flex items-center gap-2 text-xl text-gray-300 hover:text-white">
+            <i data-lucide="user" className="w-5 h-5" />
+            Mi Perfil
+          </a>
           <button id="menu-close" className="absolute top-6 right-6 p-2 text-gray-400 hover:text-white">
             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -297,6 +448,17 @@ export default function Home() {
       <section id="inicio" className="min-h-screen flex items-center justify-center relative pt-20">
         <div className="max-w-5xl mx-auto px-4 md:px-6 text-center">
           <div id="hero-content" className="transition-transform duration-300">
+            
+            {/* HEADER CON LOGOS DEL HTML */}
+            <div className="mb-8 flex justify-center gap-6">
+              <div className="relative" style={{ width: 100, height: 100 }}>
+                <img src="/bore.png" alt="Logo" className="w-full h-full rounded-full shadow-lg object-cover" />
+              </div>
+              <div className="relative" style={{ width: 80, height: 80 }}>
+                <img src="/icoJp.png" alt="Icono" className="w-full h-full rounded-2xl shadow-lg object-cover" />
+              </div>
+            </div>
+
             <div className="mb-6 inline-flex items-center gap-2 glass px-4 py-2 rounded-full">
               <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
               <span className="text-sm text-gray-300">Disponible para proyectos</span>
@@ -304,11 +466,17 @@ export default function Home() {
             <h1 id="hero-title"
               className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight"
               style={{ minHeight: '1.2em' }} />
-            <p className="text-lg md:text-xl text-gray-400 mb-8 max-w-3xl mx-auto">
+            <p className="text-lg md:text-xl text-gray-400 mb-4">
               Integrando soluciones tecnológicas con innovación educativa.
             </p>
-            <a href="#contacto" className="btn-primary px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition gap-3">
+            <p className="text-base md:text-lg text-gray-500 mb-8">
+              Disponible para proyectos
+            </p>
+            <a href="#contacto" className="btn-primary px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition gap-3 inline-flex items-center">
               Explorar
+            </a>
+            <a href="#perfil" className="btn-secondary ml-4 px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition gap-3 inline-flex items-center">
+              Learn More
             </a>
             <div className="mt-12 flex flex-col items-center gap-4 text-gray-500 md:flex-row md:justify-center md:gap-8">
               {[['20+', 'Años experiencia'], ['10K+', 'Alumnos impactados'], ['900+', 'Docentes capacitados']].flatMap(([v, l], i, arr) => {
@@ -326,6 +494,54 @@ export default function Home() {
             </div>
           </div>
         </div>
+      </section>
+
+      {/* ── CLIENTES / COLABORADORES SLIDER ── */}
+      <section className="py-12 md:py-20 bg-white/5 overflow-hidden">
+        <div className="text-center mb-8 md:mb-10">
+          <h2 className="text-xl md:text-2xl font-bold">
+            Organizaciones con las que he <span className="gradient-text">Colaborado</span>
+          </h2>
+        </div>
+        
+        <div className="relative">
+          {/* Gradientes laterales */}
+          <div className="absolute left-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-r from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+          <div className="absolute right-0 top-0 bottom-0 w-20 md:w-32 bg-gradient-to-l from-[#0a0a0a] to-transparent z-10 pointer-events-none" />
+          
+          {/* Track infinito */}
+          <div className="flex gap-8 md:gap-12 animate-scroll">
+            {[
+              { name: 'MEDUCA', color: '#3b82f6' },
+              { name: 'ProFuturo', color: '#8b5cf6' },
+              { name: 'Microsoft', color: '#10b981' },
+              { name: 'UNESCO', color: '#f59e0b' },
+              { name: 'SENACYT', color: '#06b6d4' },
+              { name: 'UNESCO', color: '#f59e0b' },
+              { name: 'SENACYT', color: '#06b6d4' },
+            ].map((org, i) => (
+              <div key={i} className="flex-shrink-0 flex items-center gap-3 glass-card px-6 py-4 rounded-xl hover:scale-105 transition-transform">
+                <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ backgroundColor: org.color + '20' }}>
+                  <span className="text-lg font-bold" style={{ color: org.color }}>{org.name.charAt(0)}</span>
+                </div>
+                <span className="text-sm font-medium text-gray-300 whitespace-nowrap">{org.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+          }
+          .animate-scroll {
+            animation: scroll 20s linear infinite;
+          }
+          .animate-scroll:hover {
+            animation-play-state: paused;
+          }
+        `}</style>
       </section>
 
       {/* ── PERFIL UNIFICADO (Docente + Soporte) ── */}
@@ -404,14 +620,23 @@ export default function Home() {
                 <h3 className="text-xl md:text-2xl font-bold text-white mb-3">
                   Jorge Polanco Rodríguez
                 </h3>
-                <p className="text-sm md:text-base text-gray-400 leading-relaxed mb-2">
-                  Profesional con más de 20 años de experiencia en tecnología educativa. Actualmente forma parte del Ministerio de Educación (MEDUCA), donde desde 2025 se desempeña en el departamento de informática y participa en el proyecto Entre Pares, impulsando la innovación pedagógica y el uso efectivo de herramientas digitales en el aula.{' '}
-                  <strong className="text-white">Entre Pares</strong>,
-                  promoviendo la innovación pedagógica y el uso de herramientas digitales en el aula.
+                <p className="text-sm md:text-base text-gray-400 leading-relaxed mb-4">
+                  Profesional con <strong className="text-white">más de 20 años de trayectoria en el área tecnológica</strong>, liderando proyectos y optimizando procesos a través de la innovación.
                 </p>
-                <p className="text-sm md:text-base text-gray-400 leading-relaxed">
-                  A lo largo de su trayectoria, ha liderado proyectos tecnológicos enfocados en optimizar procesos y fortalecer la productividad en el ámbito de la tecnología educativa. Se destaca por su capacidad de planificación estratégica y liderazgo, logrando el cumplimiento de objetivos desafiantes y promoviendo entornos de trabajo colaborativos orientados al aprendizaje continuo.
-                </p>
+                <div className="mb-4">
+                  <h4 className="text-white font-semibold mb-2">Enfoque profesional:</h4>
+                  <ul className="space-y-2 text-sm md:text-base text-gray-400">
+                    <li className="flex items-center gap-2">
+                      <span className="text-indigo-400 text-xs">◆</span> Desarrollo Frontend
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-indigo-400 text-xs">◆</span> Arquitectura y diseño de aplicaciones
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-indigo-400 text-xs">◆</span> Liderazgo técnico (Tech Lead) y gestión de equipos
+                    </li>
+                  </ul>
+                </div>
               </div>
 
               {/* Tabs Docente / Técnico */}
@@ -471,10 +696,10 @@ export default function Home() {
                         Estudios
                       </h4>
                       <ul className="space-y-2 text-gray-400 text-sm">
-                        <li>Maestría en Entornos Virtuales <span className="text-xs text-gray-600">(en curso)</span></li>
-                        <li>Tecnología Educativa</li>
-                        <li>Docentes Digitales — MEDUCA</li>
-                        <li>Gamificación para Docentes</li>
+                        <li><strong>Maestría en Entornos Virtuales</strong> <span className="text-xs text-gray-600">(en curso)</span></li>
+                        <li><strong>Tecnología Educativa</strong></li>
+                        <li><strong>Docentes Digitales</strong> — MEDUCA</li>
+                        <li><strong>Gamificación para Docentes</strong></li>
                       </ul>
                     </div>
 
@@ -521,64 +746,68 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── TIMELINE DE LOGROS ── */}
-      <section id="logros" className="py-16 md:py-32 relative overflow-hidden">
-        <div
-          className="absolute right-0 top-1/2 pointer-events-none"
-          style={{
-            width: 'min(400px,60vw)', height: 'min(400px,60vw)', transform: 'translateY(-50%)',
-            background: 'radial-gradient(circle,rgba(99,102,241,0.08) 0%,transparent 70%)', zIndex: 0
-          }}
-        />
-        <div className="max-w-6xl mx-auto px-4 md:px-6 relative z-10">
+{/* ── TIMELINE DE LOGROS ── */}
+      <section id="logros" className="py-16 md:py-32 relative overflow-hidden bg-white/5">
+
+        {/* Glow fondo */}
+        <div className="absolute inset-0 pointer-events-none" style={{
+          background: 'radial-gradient(ellipse at 50% 50%, rgba(99,102,241,0.06) 0%, transparent 70%)',
+        }} />
+
+        <div className="max-w-5xl mx-auto px-4 md:px-6 relative z-10">
 
           {/* Encabezado */}
-          <div className="text-center mb-12 md:mb-16 animate-on-scroll">
+          <div className="text-center mb-12 md:mb-20 animate-on-scroll">
             <div className="inline-flex items-center gap-2 glass px-4 py-2 rounded-full mb-4">
-              <span style={{ color: '#facc15' }}>★</span>
+              <span style={{ color:'#facc15' }}>★</span>
               <span className="text-sm text-gray-300">Trayectoria profesional</span>
             </div>
-            <h2 className="text-2xl md:text-4xl font-bold mb-4">
-              Logros &{' '}
-              <span className="gradient-text">Experiencia</span>
+            <h2 className="text-2xl md:text-4xl font-bold mb-3">
+              Logros & <span className="gradient-text">Experiencia</span>
             </h2>
-            <p className="text-sm md:text-base text-gray-400 max-w-2xl mx-auto">
-              Más de 20 años integrando tecnología y educación, liderando proyectos que han
-              impactado miles de docentes y estudiantes en Panamá y el mundo.
+            <p className="text-sm md:text-base text-gray-400 max-w-xl mx-auto">
+              Más de 25 años integrando tecnología y educación en Panamá y el mundo.
             </p>
           </div>
 
           {/* Timeline */}
           <div className="relative">
-            {/* Línea central — solo desktop */}
-            <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-px -translate-x-px timeline-line" />
 
-            <div className="flex flex-col gap-6 md:gap-0">
+            {/* Línea central vertical — solo desktop */}
+            <div className="hidden md:block absolute top-0 bottom-0 pointer-events-none"
+              style={{ left: '50%', transform: 'translateX(-50%)', width: 2, background: 'rgba(255,255,255,0.05)' }}>
+              <div id="tl-line" className="tl-line-inner w-full rounded-full"
+                style={{ background: 'linear-gradient(180deg, transparent 0%, #6366f1 15%, #a855f7 50%, #6366f1 85%, transparent 100%)' }} />
+            </div>
+
+            <div className="flex flex-col gap-4 md:gap-0">
               {timelineItems.map((item, index) => {
                 const isLeft = index % 2 === 0
                 return (
-                  <div key={item.id}
-                    className="timeline-card-wrap"
-                    style={{
-                      opacity: 0,
-                      transform: isLeft ? 'translateX(40px)' : 'translateX(-40px)',
-                      transition: `opacity 0.6s ease ${index * 0.08}s, transform 0.6s cubic-bezier(0.25,0.46,0.45,0.94) ${index * 0.08}s`,
-                    }}>
-                    <div className={`relative flex flex-col md:flex-row ${isLeft ? '' : 'md:flex-row-reverse'} items-start md:mb-10`}>
+                  <div
+                    key={item.id}
+                    className={`tl-item relative flex flex-col md:items-center md:mb-6 ${isLeft ? 'tl-enter-left' : 'tl-enter-right'}`}
+                    style={{ transitionDelay: `${index * 0.08}s` }}
+                  >
+                    {/* Layout desktop: card + punto + espacio vacío */}
+                    <div className={`flex w-full items-center gap-0 ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'}`}>
 
-                      {/* Card */}
-                      <div className={`w-full md:w-5/12 ${isLeft ? 'md:pr-10 md:text-right' : 'md:pl-10 md:text-left'}`}>
+                      {/* Card — ocupa casi la mitad, pegada al centro */}
+                      <div className={`w-full md:w-[46%] ${isLeft ? 'md:pr-5' : 'md:pl-5'}`}>
                         <div
-                          className="timeline-card p-4 md:p-6 rounded-xl md:rounded-2xl cursor-default"
+                          className="tl-card p-4 md:p-5 rounded-xl"
                           style={{
                             background: 'rgba(255,255,255,0.03)',
-                            backdropFilter: 'blur(10px)',
-                            border: item.border,
-                            transition: 'all 0.3s ease',
+                            backdropFilter: 'blur(12px)',
+                            WebkitBackdropFilter: 'blur(12px)',
+                            borderLeft: isLeft ? `3px solid ${item.dot}` : '3px solid transparent',
+                            borderRight: !isLeft ? `3px solid ${item.dot}` : '3px solid transparent',
+                            borderTop: '1px solid rgba(255,255,255,0.07)',
+                            borderBottom: '1px solid rgba(255,255,255,0.07)',
                           }}
                           onMouseEnter={e => {
                             const el = e.currentTarget as HTMLElement
-                            el.style.boxShadow = `0 20px 40px -10px ${item.glow}`
+                            el.style.boxShadow = `0 16px 40px -8px ${item.glow}`
                             el.style.background = 'rgba(255,255,255,0.06)'
                           }}
                           onMouseLeave={e => {
@@ -587,23 +816,30 @@ export default function Home() {
                             el.style.background = 'rgba(255,255,255,0.03)'
                           }}
                         >
-                          <span className="inline-block text-xs font-medium px-2 py-1 rounded-full mb-2 bg-white/5"
-                            style={{ color: item.color }}>
-                            {item.type}
-                          </span>
-                          <div className="text-xs md:text-sm font-semibold mb-1" style={{ color: item.color }}>
-                            {item.period}
+                          {/* Tipo + período en misma línea */}
+                          <div className={`flex items-center gap-2 mb-1 ${!isLeft ? 'md:flex-row-reverse' : ''}`}>
+                            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/5"
+                              style={{ color: item.color }}>
+                              {item.type}
+                            </span>
+                            <span className="text-xs text-gray-500">{item.period}</span>
                           </div>
-                          <h3 className="text-sm md:text-base lg:text-lg font-bold text-white mb-2 md:mb-3">
+
+                          {/* Rol */}
+                          <h3 className={`text-sm md:text-base font-bold text-white mb-1.5 ${!isLeft ? 'md:text-right' : ''}`}>
                             {item.role}
                           </h3>
-                          <p className="text-xs md:text-sm text-gray-400 leading-relaxed mb-3 md:mb-4">
+
+                          {/* Descripción */}
+                          <p className={`text-xs text-gray-400 leading-relaxed mb-3 ${!isLeft ? 'md:text-right' : ''}`}>
                             {item.description}
                           </p>
-                          <div className={`flex flex-wrap gap-1 md:gap-2 ${isLeft ? 'md:justify-end' : 'md:justify-start'}`}>
+
+                          {/* Tags */}
+                          <div className={`flex flex-wrap gap-1 ${!isLeft ? 'md:justify-end' : ''}`}>
                             {item.tags.map(tag => (
                               <span key={tag}
-                                className="text-xs px-2 py-0.5 rounded-full border border-white/10 bg-white/5 text-gray-400">
+                                className="text-xs px-1.5 py-0.5 rounded-full bg-white/5 text-gray-500 border border-white/8">
                                 {tag}
                               </span>
                             ))}
@@ -611,16 +847,19 @@ export default function Home() {
                         </div>
                       </div>
 
-                      {/* Punto en la línea — solo desktop */}
-                      <div className="hidden md:flex w-2/12 justify-center items-start pt-5 relative z-10">
+                      {/* Punto central — solo desktop, pegado a la línea */}
+                      <div className="hidden md:flex w-[8%] justify-center items-center relative z-20">
                         <div
-                          className="timeline-dot w-4 h-4 rounded-full border-2 bg-[#0a0a0a]"
-                          style={{ borderColor: item.dot, boxShadow: `0 0 12px ${item.glow}` }}
+                          className="tl-dot w-3 h-3 rounded-full border-2 bg-[#0a0a0a]"
+                          style={{
+                            borderColor: item.dot,
+                            boxShadow: `0 0 10px ${item.glow}, 0 0 20px ${item.glow}`,
+                          }}
                         />
                       </div>
 
-                      {/* Columna opuesta vacía */}
-                      <div className="hidden md:block w-5/12" />
+                      {/* Columna vacía del lado opuesto */}
+                      <div className="hidden md:block md:w-[46%]" />
                     </div>
                   </div>
                 )
@@ -629,16 +868,16 @@ export default function Home() {
           </div>
 
           {/* Resumen de impacto */}
-          <div className="mt-12 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 animate-on-scroll">
+          <div className="mt-14 md:mt-20 grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 animate-on-scroll">
             {[
-              { v: '20+', l: 'Años de experiencia', c: '#818cf8' },
-              { v: '10K+', l: 'Alumnos impactados', c: '#a78bfa' },
-              { v: '900+', l: 'Docentes capacitados', c: '#4ade80' },
-              { v: '9', l: 'Escuelas transformadas', c: '#22d3ee' },
+              { v:'25+',  l:'Años de experiencia',    c:'#818cf8' },
+              { v:'10K+', l:'Alumnos impactados',     c:'#a78bfa' },
+              { v:'900+', l:'Docentes capacitados',   c:'#4ade80' },
+              { v:'9',    l:'Escuelas transformadas', c:'#22d3ee' },
             ].map(s => (
-              <div key={s.v} className="glass-card p-4 md:p-6 rounded-xl text-center">
-                <div className="text-2xl md:text-4xl font-bold mb-1" style={{ color: s.c }}>{s.v}</div>
-                <div className="text-xs md:text-sm text-gray-400">{s.l}</div>
+              <div key={s.v} className="glass-card p-4 rounded-xl text-center">
+                <div className="text-2xl md:text-3xl font-bold mb-1" style={{ color: s.c }}>{s.v}</div>
+                <div className="text-xs text-gray-400">{s.l}</div>
               </div>
             ))}
           </div>
@@ -646,22 +885,36 @@ export default function Home() {
       </section>
 
       {/* ── STACK ── */}
-      <section id="stack" className="py-16 md:py-32 text-center bg-white/5">
-        <h2 className="text-2xl md:text-4xl font-bold mb-10">Tecnologías</h2>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 max-w-4xl mx-auto px-4">
-          {[
-            { icon: 'code', name: 'HTML', color: 'text-orange-500' },
-            { icon: 'file-code', name: 'CSS', color: 'text-blue-500' },
-            { icon: 'zap', name: 'JavaScript', color: 'text-yellow-500' },
-            { icon: 'atom', name: 'Astro', color: 'text-purple-500' },
-            { icon: 'monitor', name: 'Frontend', color: 'text-cyan-500' },
-            { icon: 'wifi', name: 'Redes', color: 'text-green-500' },
-          ].map(({ icon, name, color }) => (
-            <div key={name} className="skill-card tech-card glass-card group p-6 rounded-2xl flex flex-col items-center gap-3">
-              <i data-lucide={icon} className={`w-8 h-8 ${color}`} />
-              <span className="text-sm font-medium">{name}</span>
-            </div>
-          ))}
+      <section id="stack" className="py-16 md:py-32 bg-white/5">
+        <div className="max-w-6xl mx-auto px-4 md:px-6">
+          <div className="text-center mb-10 md:mb-14 animate-on-scroll">
+            <h2 className="text-2xl md:text-4xl font-bold">
+              Tecnologías y <span className="gradient-text">Herramientas</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {techStack.map((category: any) => (
+              <div key={category.title || category.label} className="glass-card p-6 rounded-2xl hover:scale-[1.02] transition-transform animate-on-scroll">
+                <div className="flex items-center gap-3 mb-4">
+                  <i data-lucide={category.icon} className={`w-6 h-6 ${category.color.startsWith('#') ? '' : category.color}`} style={{ color: category.color.startsWith('#') ? category.color : undefined }} />
+                  <h3 className="text-lg font-bold text-white">{category.title || category.label}</h3>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {(category.items || []).map((item: string) => (
+                    <span key={item} className="text-xs px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-300">
+                      {item}
+                    </span>
+                  ))}
+                  {(category.techs || []).map((tech: any) => (
+                    <span key={tech.name} className="flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border border-white/10 bg-white/5 text-gray-300">
+                      <i data-lucide={tech.icon} className="w-3 h-3" style={{ color: tech.color }} />
+                      {tech.name}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -687,9 +940,9 @@ export default function Home() {
       <section id="contacto" className="py-16 md:py-32 text-center relative bg-white/5">
         <div className="max-w-3xl mx-auto px-4 md:px-6">
           <h2 className="text-2xl md:text-4xl font-bold mb-6">Contacto</h2>
-          <p className="text-sm md:text-base text-gray-400 mb-10">¿Tienes un proyecto en mente? Hablemos.</p>
+          <p className="text-sm md:text-base text-gray-400 mb-4">¿Tienes un proyecto en mente? Hablemos.</p>
           <a href="https://wa.me/50765360544"
-            className="btn-primary px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition gap-3">
+            className="btn-primary px-8 py-4 rounded-full text-lg font-semibold hover:scale-105 transition gap-3 inline-flex items-center">
             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
               <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.149-.149.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.371.025-.52-.075-.149-.661-1.611-1.904-2.207-.372-.149-1.495-.149-1.921-.149-.421 0-.746.074-.992.146-.249.075-.448.249-.644.454l-1.612 1.195Z" />
             </svg>
